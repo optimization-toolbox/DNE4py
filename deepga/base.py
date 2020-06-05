@@ -92,8 +92,8 @@ class BaseGA(ABC):
 
     def mpi_save(self, s):
 
-        self.mpidata_genealogies.write({s: self.genealogies})
-        self.mpidata_costs.write({s: self.costs})
+        self.mpidata_genealogies.write(self.genealogies)
+        self.mpidata_costs.write(self.costs)
 
     @ property
     def best(self):
@@ -112,7 +112,7 @@ class BaseGA(ABC):
         genealogies = []
         for member in self.members:
             genealogies.append(member.genealogy)
-        return genealogies
+        return np.array(genealogies)
 
     @ property
     def costs(self):

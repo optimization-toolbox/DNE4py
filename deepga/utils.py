@@ -15,7 +15,6 @@ class MPIData:
         assert os.path.isfile(self.filename) == False, 'You should delete all files inside the folder results/experiment'
 
     def write(self, data):
-        print(data)
         with open(self.filename, 'ab') as f:
             pickle.dump(data, f)
 
