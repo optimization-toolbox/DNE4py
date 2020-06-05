@@ -6,7 +6,7 @@ from .sliceops import *
 from abc import ABC, abstractmethod
 from collections import Counter
 
-from .logger import MPILogger, MPIData
+from .utils import MPILogger, MPIData
 
 
 class BaseGA(ABC):
@@ -28,12 +28,18 @@ class BaseGA(ABC):
         self.initial_guess = kwargs.get('initial_guess').astype(dtype=np.float32)
         self.num_elite = kwargs.get('num_elite', 1)
         self.global_seed = kwargs.get('seed', 1)
+        self.save = kwargs.get('save', -1)
 
         self.members_per_rank = kwargs.get('members_per_rank', 10)
         self.population_size = self._size * self.members_per_rank
 
         # Internal Parameters:
         self._generation_number = 0
+
+        # Prepare save file:
+        if self.save > 0:
+            self.mpidata_genealogies = MPIData('genealogy', self._rank)
+            self.mpidata_costs = MPIData('costs', self._rank)
 
     @abstractmethod
     def apply_selection(self, ranks_by_performance):
@@ -43,30 +49,25 @@ class BaseGA(ABC):
     def apply_mutation(self, ranks_by_performance):
         pass
 
-    def __call__(self, n_steps, save=-1):
+    def __call__(self, n_steps):
 
-        # Prepare save file:
-        if save > 0:
-            self.info_genealogies = MPIData('genealogy', self._rank)
-            self.info_costs = MPIData('costs', self._rank)
-
-        for i in range(n_steps):
+        for s in range(n_steps):
 
             self.logger.debug(f"Generation:  {self._generation_number}")
-            self._step()
+            self._step(s)
 
-            if (save > 0) and (i % save == 0):
-                self.info_genealogies.write(self.genealogies)
-                self.info_costs.write(self.costs)
-
-    def _step(self):
+    def _step(self, s):
 
         # Evaluate member:
         self.cost_list = np.zeros(self.members_per_rank, dtype=np.float32)
         for i in range(len(self.cost_list)):
             self.cost_list[i] = self.objective(self.members[i].parameters)
 
-        # Broadcast fitness:
+        # Save:
+        if (self.save > 0) and (s % self.save == 0):
+            self.mpi_save(s)
+
+            # Broadcast fitness:
         cost_matrix = np.empty((self._size, self.members_per_rank),
                                dtype=np.float32)
         self._comm.Allgather([self.cost_list, self._MPI.FLOAT],
@@ -89,6 +90,11 @@ class BaseGA(ABC):
     def load(cls, filename):
         pass
 
+    def mpi_save(self, s):
+
+        self.mpidata_genealogies.write({s: self.genealogies})
+        self.mpidata_costs.write({s: self.costs})
+
     @ property
     def best(self):
         """
@@ -105,8 +111,8 @@ class BaseGA(ABC):
         """
         genealogies = []
         for member in self.members:
-            genealogies.append(np.array(member.genealogy))
-        return np.array(genealogies)
+            genealogies.append(member.genealogy)
+        return genealogies
 
     @ property
     def costs(self):

@@ -17,7 +17,8 @@ a = TruncatedRealMutatorGA(objective=objective,
                            num_elite=2,
                            num_parents=2,
                            verbose=True,
-                           seed=2
+                           seed=2,
+                           save=1
                            )
 
-a(10, save=2)
+a(5)
