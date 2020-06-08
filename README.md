@@ -5,6 +5,13 @@ Status: Maintenance (expect bug fixes and minor updates)
 
 Implementation of Deep Neuroevolution: Genetic Algorithms Are a Competitive Alternative for Training Deep Neural Networks for Reinforcement Learning (https://arxiv.org/abs/1712.06567)
 
+How to install?
+
+python3 -m pip install -e .
+
+import deep_neuroevolution
+
+
 How to use?
 
 mpiexec -n 4 python3 main.py
