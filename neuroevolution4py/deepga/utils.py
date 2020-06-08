@@ -1,7 +1,6 @@
 import os
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
 
 import numpy as np
 
@@ -10,6 +9,9 @@ import pickle
 class MPIData:
 
     def __init__(self, name, worker):
+
+        logging.basicConfig(level=logging.DEBUG)
+
         self.filename = f'results/experiment/{name}_w{worker}.pkl'
         assert os.path.isdir('results/experiment') == True, 'You should create the folder results/experiment'
         assert os.path.isfile(self.filename) == False, 'You should delete all files inside the folder results/experiment'
