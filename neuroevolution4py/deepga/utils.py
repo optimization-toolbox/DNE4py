@@ -8,25 +8,25 @@ import pickle
 
 def join_mpidata(name, nb_workers, nb_generations):
 
-    path = f'results/experiment/{name}'
+    path = 'results/experiment/' + str(name)
 
     full_data = [[]] * nb_generations
     for w in range(nb_workers):
-        with open(f'{path}_w{w}.pkl', 'rb') as f:
+        with open(str(path) + '_w' + str(w) + '.pkl', 'rb') as f:
             for g in range(nb_generations):
                 worker_data = pickle.load(f).tolist()
                 full_data[g] = full_data[g] + worker_data
     full_data = np.array(full_data)
 
     # Save:
-    with open(f'{path}.pkl', 'wb') as f:
+    with open(str(path) + '.pkl', 'wb') as f:
         pickle.dump(full_data, f)
 
 def load_mpidata(name):
 
-    path = f'results/experiment/{name}'
+    path = 'results/experiment/' + str(name)
 
-    with open(f'{path}.pkl', 'rb') as f:
+    with open(str(path) + '.pkl', 'rb') as f:
         data = pickle.load(f)
 
     return data
@@ -38,7 +38,7 @@ class MPIData:
 
         logging.basicConfig(level=logging.DEBUG)
 
-        self.filename = f'results/experiment/{name}_w{worker}.pkl'
+        self.filename = 'results/experiment/' + str(name) + '_w' + str(worker) + '.pkl'
         assert os.path.isdir('results/experiment') == True, 'You should create the folder results/experiment'
         assert os.path.isfile(self.filename) == False, 'You should delete all files inside the folder results/experiment'
 
