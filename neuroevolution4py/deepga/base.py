@@ -53,7 +53,7 @@ class BaseGA(ABC):
 
         for s in range(n_steps):
 
-            self.logger.debug(f"Generation:  {self._generation_number}")
+            self.logger.debug("Generation:" + str(self._generation_number))
             self._step(s)
 
     def _step(self, s):
