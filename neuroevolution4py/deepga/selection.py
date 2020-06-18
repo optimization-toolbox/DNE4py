@@ -48,14 +48,14 @@ class TruncatedSelection(BaseGA):
              dest_member_id) in messenger_list:
             if src_rank != dest_rank:  # Need MPI send
                 if self._rank == src_rank:
-                    message = (self.members[src_member_id].genealogy,
+                    message = (self.members[src_member_id].genotype,
                                dest_member_id)
                     self._comm.send(message, dest=dest_rank)
                 elif self._rank == dest_rank:
-                    new_genealogy, member_id = self._comm.recv(source=src_rank)
-                    self.members[member_id].new(new_genealogy)
+                    new_genotype, member_id = self._comm.recv(source=src_rank)
+                    self.members[member_id].recreate(new_genotype)
             else:
                 if (self._rank == src_rank):
-                    new_genealogy = self.members[src_member_id].genealogy
+                    new_genotype = self.members[src_member_id].genotype
                     member_id = dest_member_id
-                    self.members[member_id].new(new_genealogy)
+                    self.members[member_id].recreate(new_genotype)

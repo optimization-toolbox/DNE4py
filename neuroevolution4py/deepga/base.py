@@ -38,7 +38,7 @@ class BaseGA(ABC):
 
         # Prepare save file:
         if self.save > 0:
-            self.mpidata_genealogies = MPIData('genealogy', self._rank)
+            self.mpidata_genealogies = MPIData('genotype', self._rank)
             self.mpidata_costs = MPIData('costs', self._rank)
             self.mpidata_initialguess = MPIData('initial_guess', 0)
 
@@ -62,7 +62,7 @@ class BaseGA(ABC):
         # Evaluate member:
         self.cost_list = np.zeros(self.workers_per_rank, dtype=np.float32)
         for i in range(len(self.cost_list)):
-            self.cost_list[i] = self.objective(self.members[i].parameters)
+            self.cost_list[i] = self.objective(self.members[i].phenotype)
 
         # Save:
         if (self.save > 0) and (s % self.save == 0):
@@ -102,7 +102,7 @@ class BaseGA(ABC):
         """
         genealogies = []
         for member in self.members:
-            genealogies.append(member.genealogy)
+            genealogies.append(member.genotype)
         return np.array(genealogies)
 
     @ property
