@@ -42,6 +42,8 @@ class Member:
     # MUTATION
     def mutate(self):
 
+        # if self._rank == 0:
+
         # New gene
         seed = self.rng_epsilons.randint(0, 2 ** 32 - 1)
         self.genealogy.append(seed)
@@ -57,23 +59,26 @@ class RealMutator(BaseGA):
         super().__init__(**kwargs)
 
         # Input:
-        self.sigma = kwargs.get('sigma', 1.0)
+        self.sigma = kwargs.get('sigma')
 
         # Init seedmatrix:
         self.rgn_init = random.Random(self.global_seed)
 
-        self.seedmatrix_init_genes = np.zeros((self._size, self.members_per_rank), dtype=np.int64)
+        self.seedmatrix_init_genes = np.zeros((self._size, self.workers_per_rank), dtype=np.int64)
         for i in range(self._size):
-            row = self.rgn_init.sample(range(2**32 - 1), self.members_per_rank)
+            row = self.rgn_init.sample(range(2**32 - 1), self.workers_per_rank)
             self.seedmatrix_init_genes[i] = row
 
-        self.seedmatrix_init_epsilons = np.zeros((self._size, self.members_per_rank), dtype=np.int64)
+        self.seedmatrix_init_epsilons = np.zeros((self._size, self.workers_per_rank), dtype=np.int64)
         for i in range(self._size):
-            row = self.rgn_init.sample(range(2**32 - 1), self.members_per_rank)
+            row = self.rgn_init.sample(range(2**32 - 1), self.workers_per_rank)
             self.seedmatrix_init_epsilons[i] = row
 
         # Init rng_epsilons_list
-        self.rng_epsilons_list = [np.random.RandomState(self.seedmatrix_init_epsilons[self._rank, i]) for i in range(self.members_per_rank)]
+        self.rng_epsilons_list = [np.random.RandomState(self.seedmatrix_init_epsilons[self._rank, i]) for i in range(self.workers_per_rank)]
+
+        print(f"\n\n{self.rng_epsilons_list}\n\n")
+        exit()
 
         # Init genes:
         self.init_genes = self.seedmatrix_init_genes[self._rank]
@@ -82,37 +87,17 @@ class RealMutator(BaseGA):
                                init_gene=self.init_genes[i],
                                rng_epsilons=self.rng_epsilons_list[i],
                                sigma=self.sigma)
-                        for i in range(self.members_per_rank)]
+                        for i in range(self.workers_per_rank)]
 
     def apply_mutation(self, ranks_and_members_by_performance):
         """
         Preserve the top num_elite members, mutate the rest
         """
-        elite_mask = ranks_and_members_by_performance < self.num_elite
-        row, column = np.where(elite_mask)
-        elite_tuples = tuple(zip(row, column))
+        no_elite_mask = ranks_and_members_by_performance > self.num_elite
 
-        for rank, member_id in elite_tuples:
+        row, column = np.where(no_elite_mask)
+        no_elite_tuples = tuple(zip(row, column))
+
+        for rank, member_id in no_elite_tuples:
             if rank == self._rank:
                 self.members[member_id].mutate()
-
-        # for i, rank in enumerate(ranks_and_members_by_performance[self.num_elite:]):
-        #    if rank == self._rank:
-        #        self.member.mutate()
-
-    def __getstate__(self):
-        state = super().__getstate__()
-        state["sigma"] = self.sigma
-        state["_member"] = self._member
-
-        return state
-
-    def __setstate__(self, state):
-        """
-        The members need to be generated from the member's genealogy,
-        as only the rank=0 member is actually saved.
-        The member genealogy is set to the proper rank by the baseGA
-        """
-        super().__setstate__(state)
-        self._member = self._make_member(self._mutation_rng,
-                                         self._member_genealogy)

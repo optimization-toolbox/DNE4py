@@ -59,9 +59,3 @@ class TruncatedSelection(BaseGA):
                     new_genealogy = self.members[src_member_id].genealogy
                     member_id = dest_member_id
                     self.members[member_id].new(new_genealogy)
-
-    def __getstate__(self):
-        state = super().__getstate__()
-        state["_num_parents"] = self._num_parents
-
-        return state

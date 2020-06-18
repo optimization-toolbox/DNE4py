@@ -24,14 +24,14 @@ class BaseGA(ABC):
         self.logger = MPILogger(self._rank)
 
         # Input:
-        self.objective = kwargs.get('objective', None)
+        self.objective = kwargs.get('objective')
         self.initial_guess = kwargs.get('initial_guess').astype(dtype=np.float32)
-        self.num_elite = kwargs.get('num_elite', 1)
-        self.global_seed = kwargs.get('seed', 1)
+        self.num_elite = kwargs.get('num_elite')
+        self.global_seed = kwargs.get('seed')
         self.save = kwargs.get('save', -1)
 
-        self.members_per_rank = kwargs.get('members_per_rank', 10)
-        self.population_size = self._size * self.members_per_rank
+        self.workers_per_rank = kwargs.get('workers_per_rank')
+        self.population_size = self._size * self.workers_per_rank
 
         # Internal Parameters:
         self._generation_number = 0
@@ -40,6 +40,7 @@ class BaseGA(ABC):
         if self.save > 0:
             self.mpidata_genealogies = MPIData('genealogy', self._rank)
             self.mpidata_costs = MPIData('costs', self._rank)
+            self.mpidata_initialguess = MPIData('initial_guess', 0)
 
     @abstractmethod
     def apply_selection(self, ranks_by_performance):
@@ -59,7 +60,7 @@ class BaseGA(ABC):
     def _step(self, s):
 
         # Evaluate member:
-        self.cost_list = np.zeros(self.members_per_rank, dtype=np.float32)
+        self.cost_list = np.zeros(self.workers_per_rank, dtype=np.float32)
         for i in range(len(self.cost_list)):
             self.cost_list[i] = self.objective(self.members[i].parameters)
 
@@ -67,8 +68,8 @@ class BaseGA(ABC):
         if (self.save > 0) and (s % self.save == 0):
             self.mpi_save(s)
 
-            # Broadcast fitness:
-        cost_matrix = np.empty((self._size, self.members_per_rank),
+        # Broadcast fitness:
+        cost_matrix = np.empty((self._size, self.workers_per_rank),
                                dtype=np.float32)
         self._comm.Allgather([self.cost_list, self._MPI.FLOAT],
                              [cost_matrix, self._MPI.FLOAT])
@@ -86,22 +87,12 @@ class BaseGA(ABC):
         # Next generation_number:
         self._generation_number += 1
 
-    @ classmethod
-    def load(cls, filename):
-        pass
-
     def mpi_save(self, s):
 
         self.mpidata_genealogies.write(self.genealogies)
         self.mpidata_costs.write(self.costs)
-
-    @ property
-    def best(self):
-        """
-        :return: generates and returns the best member of the population.
-            Only Rank==0 should be accessing this property.
-        """
-        pass
+        if s == 0:
+            self.mpidata_initialguess.write(self.initial_guess)
 
     @ property
     def genealogies(self):
@@ -121,44 +112,3 @@ class BaseGA(ABC):
             as population list. Only Rank==0 should be accessing this property.
         """
         return self.cost_list
-
-    def __getstate__(self):
-
-        state = {"num_elite": self.num_elite,
-                 "_max_seed": self._max_seed,
-                 "global_seed": self.global_seed,
-                 "rgn_selection": self.rgn_selection,
-                 "rgn_init": self.rgn_init,
-                 "seedlist_init_params": self.seedlist_init_params,
-                 "seedlist_init_epsilons": self.seedlist_init_epsilons,
-                 "_mutation_rng": self._mutation_rng,
-                 "rng_epsilons": self.rng_epsilons,
-                 "_generation_number": self._generation_number,
-                 "_cost_history": self._cost_history,
-                 "_member_genealogy": self._member_genealogy,
-                 "initial_guess": self.initial_guess}
-
-        return state
-
-    def __setstate__(self, state):
-        """
-        Member genealogy must be reset to the corresponding rank, since
-        only rank0 is saved.
-        """
-        for key in state:
-            setattr(self, key, state[key])
-
-        # Reconstruct larger structures and load MPI
-        from mpi4py import MPI
-        self._MPI = MPI
-        self._comm = MPI.COMM_WORLD
-        self._size = self._comm.Get_size()
-        self._rank = self._comm.Get_rank()
-        self.objective = None
-        self.obj_args = None
-
-        # Reassign member genealogies and make seed rng recent
-        self.rng_epsilons = np.random.RandomState(self.seedlist_init_epsilons[self._rank])
-        for i in range(self._generation_number):
-            self.rng_epsilons.randint(0, self._max_seed)
-        self._member_genealogy = self._population_genealogy[self._rank][:]
