@@ -8,6 +8,7 @@ from collections import Counter
 
 from .utils import MPILogger, MPIData
 
+import time
 
 class BaseGA(ABC):
 
@@ -60,6 +61,7 @@ class BaseGA(ABC):
     def _step(self, s):
 
         # Evaluate member:
+        t = time.time()
         self.cost_list = np.zeros(self.workers_per_rank, dtype=np.float32)
         for i in range(len(self.cost_list)):
             self.cost_list[i] = self.objective(self.members[i].phenotype)
@@ -69,6 +71,7 @@ class BaseGA(ABC):
             self.mpi_save(s)
 
         # Broadcast fitness:
+        t = time.time() #########
         cost_matrix = np.empty((self._size, self.workers_per_rank),
                                dtype=np.float32)
         self._comm.Allgather([self.cost_list, self._MPI.FLOAT],
@@ -79,6 +82,7 @@ class BaseGA(ABC):
         rank = np.argsort(order)
         ranks_and_members_by_performance = rank.reshape(cost_matrix.shape)
 
+        # Apply selection:
         self.apply_selection(ranks_and_members_by_performance)
 
         # Apply mutations:

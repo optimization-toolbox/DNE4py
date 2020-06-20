@@ -41,6 +41,15 @@ class TruncatedSelection(BaseGA):
                                    dest_rank,
                                    dest_member_id))
 
+        #messenger_list = [[[] for j in range(len(ranks_and_members_by_performance))] for i in range(len(ranks_and_members_by_performance[0]))]
+        #for dest_rank, dest_member_id in no_parents_indexes:
+        #    choice = self.rgn_selection.choice(parent_options)
+        #    src_rank, src_member_id = parents_indexes[choice]
+        #    messenger_list[src_rank][dest_rank].append((src_member_id, dest_member_id))
+        #print(messenger_list)
+        #print(messenger_list[0][1])
+        #exit()
+
         # Dispatch message_list:
         for (src_rank,
              src_member_id,
@@ -59,3 +68,4 @@ class TruncatedSelection(BaseGA):
                     new_genotype = self.members[src_member_id].genotype
                     member_id = dest_member_id
                     self.members[member_id].recreate(new_genotype)
+        #exit()
