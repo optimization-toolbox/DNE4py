@@ -62,7 +62,6 @@ class Member:
             self.rng.seed(seed)
             self.phenotype += self.rng.randn(self.size) * self.sigma
 
-
 class RealMutator(BaseGA):
 
     def __init__(self, **kwargs):

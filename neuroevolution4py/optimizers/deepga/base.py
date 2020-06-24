@@ -6,7 +6,7 @@ from .sliceops import *
 from abc import ABC, abstractmethod
 from collections import Counter
 
-from .utils import MPILogger, MPIData
+from neuroevolution4py.utils import MPILogger, MPIData
 
 import time
 
@@ -26,7 +26,7 @@ class BaseGA(ABC):
 
         # Input:
         self.objective = kwargs.get('objective')
-        self.initial_guess = kwargs.get('initial_guess').astype(dtype=np.float32)
+        self.initial_guess = kwargs.get('initial_guess')
         self.num_elite = kwargs.get('num_elite')
         self.global_seed = kwargs.get('seed')
         self.save = kwargs.get('save', -1)
@@ -39,7 +39,7 @@ class BaseGA(ABC):
 
         # Prepare save file:
         if self.save > 0:
-            self.mpidata_genealogies = MPIData('genotype', self._rank)
+            self.mpidata_genealogies = MPIData('genotypes', self._rank)
             self.mpidata_costs = MPIData('costs', self._rank)
             self.mpidata_initialguess = MPIData('initial_guess', 0)
 
@@ -62,7 +62,7 @@ class BaseGA(ABC):
 
         # Evaluate member:
         t = time.time()
-        self.cost_list = np.zeros(self.workers_per_rank, dtype=np.float32)
+        self.cost_list = np.zeros(self.workers_per_rank)
         for i in range(len(self.cost_list)):
             self.cost_list[i] = self.objective(self.members[i].phenotype)
 
@@ -71,9 +71,8 @@ class BaseGA(ABC):
             self.mpi_save(s)
 
         # Broadcast fitness:
-        t = time.time() #########
-        cost_matrix = np.empty((self._size, self.workers_per_rank),
-                               dtype=np.float32)
+        t = time.time()
+        cost_matrix = np.empty((self._size, self.workers_per_rank))
         self._comm.Allgather([self.cost_list, self._MPI.FLOAT],
                              [cost_matrix, self._MPI.FLOAT])
 
