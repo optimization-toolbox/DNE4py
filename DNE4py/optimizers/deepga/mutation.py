@@ -32,6 +32,8 @@ class Member:
         self.initial_phenotype = initial_phenotype
         self.phenotype = self.initial_phenotype.copy()
 
+        #self.initial_genotype = initial_genotype.copy()
+
         # Internal attributes:
         self.rng = np.random.RandomState()
         self.size, self.sigma = len(self.phenotype), sigma
@@ -54,10 +56,11 @@ class Member:
         r'''update genotype and phenotype from new_genotype'''
 
         # Set genotype:
-        self.genotype = new_genotype
+        self.genotype = new_genotype[:]
 
         # Set phenotype:
         self.phenotype[:] = self.initial_phenotype[:]
+
         for seed in self.genotype:
             self.rng.seed(seed)
             self.phenotype += self.rng.randn(self.size) * self.sigma
@@ -97,10 +100,20 @@ class RealMutator(BaseGA):
         """
         Preserve the top num_elite members, mutate the rest
         """
-        no_elite_mask = ranks_and_members_by_performance > self.num_elite
+        no_elite_mask = ranks_and_members_by_performance >= self.num_elite
 
         row, column = np.where(no_elite_mask)
         no_elite_tuples = tuple(zip(row, column))
+
+        # =============== DEBUG =============================
+        self.logger.debug(f"\nSelected Elite:")
+        self.logger.debug(f"| rank | member_id |")
+        elite_mask = np.invert(no_elite_mask)
+        row, column = np.where(elite_mask)
+        elite_indexes = tuple(zip(row, column))
+        for rank, member_id in elite_indexes:
+            self.logger.debug(f"| {rank} | {member_id} |")
+        # =============== END =============================
 
         for rank, member_id in no_elite_tuples:
             if rank == self._rank:

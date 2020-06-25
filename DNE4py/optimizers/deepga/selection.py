@@ -30,6 +30,13 @@ class TruncatedSelection(BaseGA):
         row, column = np.where(no_parents_mask)
         no_parents_indexes = tuple(zip(row, column))
 
+        # =============== DEBUG =============================
+        self.logger.debug(f"\nSelected Parents:")
+        self.logger.debug(f"| rank | member_id |")
+        for rank, member_id in parents_indexes:
+            self.logger.debug(f"| {rank} | {member_id} |")
+        # =============== END =============================
+
         # 2 - Update member for each rank:
         # Build message_list:
         messenger_list = []
@@ -41,17 +48,27 @@ class TruncatedSelection(BaseGA):
                                    dest_rank,
                                    dest_member_id))
 
+        # =============== DEBUG =============================
+        self.logger.debug(f"\nSelection Messenger List")
+        self.logger.debug(f"| src_rank | src_member_id | dest_rank | dest_member_id |")
+        for (src_rank,
+             src_member_id,
+             dest_rank,
+             dest_member_id) in messenger_list:
+            self.logger.debug(f"| {src_rank} | {src_member_id} | {dest_rank} | {dest_member_id} |")
+        # =============== END =============================
+
         # Dispatch message_list:
         for (src_rank,
              src_member_id,
              dest_rank,
              dest_member_id) in messenger_list:
-            if src_rank != dest_rank:  # Need MPI send
-                if self._rank == src_rank:
+            if src_rank != dest_rank:  # Need send to MPI
+                if src_rank == self._rank:
                     message = (self.members[src_member_id].genotype,
                                dest_member_id)
                     self._comm.send(message, dest=dest_rank)
-                elif self._rank == dest_rank:
+                elif dest_rank == self._rank:
                     new_genotype, member_id = self._comm.recv(source=src_rank)
                     self.members[member_id].recreate(new_genotype)
             else:

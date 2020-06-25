@@ -2,9 +2,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from neuroevolution4py.optimizers.deepga import TruncatedRealMutatorGA
-from neuroevolution4py.utils import join_mpidata, load_mpidata
-from neuroevolution4py.optimizers.deepga.mutation import Member
+from DNE4py.optimizers.deepga import TruncatedRealMutatorGA
+from DNE4py.utils import join_mpidata, load_mpidata
+from DNE4py.optimizers.deepga.mutation import Member
 
 
 def objective(x):
@@ -21,10 +21,10 @@ def train(steps):
                                        num_elite=1,
                                        num_parents=3,
                                        sigma=sigma,
-                                       verbose=True,
-                                       seed=2,
-                                       save=1
-                                       )
+                                       seed=100,
+                                       save=1,
+                                       verbose=1,
+                                       output_folder='results/experiment')
 
     optimizer(steps)
 
@@ -39,14 +39,20 @@ def test(steps):
     genotypes = load_mpidata("genotypes")
 
     # Training performance
-    means = np.mean(costs, axis=1)
-    stds = np.std(costs, axis=1)
-    mins = np.min(costs, axis=1)
-    maxes = np.max(costs, axis=1)
+    #means = np.mean(costs, axis=1)
+    #stds = np.std(costs, axis=1)
+    #mins = np.min(costs, axis=1)
+    #maxes = np.max(costs, axis=1)
 
-    plt.errorbar(np.arange(steps), means, stds, fmt='ok', lw=3)
-    plt.errorbar(np.arange(steps), means, [means - mins, maxes - means],
-                 fmt='.k', ecolor='gray', lw=1)
+    #plt.errorbar(np.arange(steps), means, stds, fmt='ok', lw=3)
+    # plt.errorbar(np.arange(steps), means, [means - mins, maxes - means],
+    #             fmt='.k', ecolor='gray', lw=1)
+    #plt.xlim(-1, steps)
+    #plt.xticks(np.arange(-1, steps + 1, 1.0))
+    # plt.show()
+
+    mins = np.min(costs, axis=1)
+    plt.plot(np.arange(steps), mins)
     plt.xlim(-1, steps)
     plt.xticks(np.arange(-1, steps + 1, 1.0))
     plt.show()

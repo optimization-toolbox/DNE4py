@@ -21,14 +21,13 @@ class BaseGA(ABC):
         self._size = self._comm.Get_size()
         self._rank = self._comm.Get_rank()
 
-        # Logger for MPI:
-        self.logger = MPILogger(self._rank)
-
         # Input:
         self.objective = kwargs.get('objective')
         self.initial_guess = kwargs.get('initial_guess')
         self.num_elite = kwargs.get('num_elite')
         self.global_seed = kwargs.get('seed')
+
+        self.verbose = kwargs.get('verbose', 0)
         self.save = kwargs.get('save', -1)
 
         self.workers_per_rank = kwargs.get('workers_per_rank')
@@ -37,7 +36,9 @@ class BaseGA(ABC):
         # Internal Parameters:
         self._generation_number = 0
 
-        # Prepare save file:
+        # Logger and DataCollector for MPI:
+        if self.verbose == 2:
+            self.logger = MPILogger(self._rank)
         if self.save > 0:
             self.mpidata_genealogies = MPIData('genotypes', self._rank)
             self.mpidata_costs = MPIData('costs', self._rank)
@@ -54,8 +55,7 @@ class BaseGA(ABC):
     def __call__(self, n_steps):
 
         for s in range(n_steps):
-
-            self.logger.debug("Generation:" + str(self._generation_number))
+            self.logger.debug(f"\nGeneration: {self._generation_number}")
             self._step(s)
 
     def _step(self, s):
@@ -65,6 +65,17 @@ class BaseGA(ABC):
         self.cost_list = np.zeros(self.workers_per_rank)
         for i in range(len(self.cost_list)):
             self.cost_list[i] = self.objective(self.members[i].phenotype)
+
+        # =============== DEBUG =============================
+        self.logger.debug(f"\nPopulation Members (Initial):")
+        self.logger.debug(f"| index | seed | x0 | x1 | y |")
+        for index in range(len(self.members)):
+            seed = self.members[index].genotype
+            x0 = self.members[index].phenotype[0].round(10)
+            x1 = self.members[index].phenotype[1].round(10)
+            y = self.cost_list[index].round(10)
+            self.logger.debug(f"| {index} | {seed} | {x0} | {x1} | {y} |")
+        # =============== END =============================
 
         # Save:
         if (self.save > 0) and (s % self.save == 0):
@@ -84,8 +95,28 @@ class BaseGA(ABC):
         # Apply selection:
         self.apply_selection(ranks_and_members_by_performance)
 
+        # =============== DEBUG =============================
+        self.logger.debug(f"\nPopulation Members (After Selection):")
+        self.logger.debug(f"| index | seed | x0 | x1 |")
+        for index in range(len(self.members)):
+            seed = self.members[index].genotype
+            x0 = self.members[index].phenotype[0].round(10)
+            x1 = self.members[index].phenotype[1].round(10)
+            self.logger.debug(f"| {index} | {seed} | {x0} | {x1} |")
+        # =============== END =============================
+
         # Apply mutations:
         self.apply_mutation(ranks_and_members_by_performance)
+
+        # =============== DEBUG =============================
+        self.logger.debug(f"\nPopulation Members (After Mutation):")
+        self.logger.debug(f"| index | seed | x0 | x1 |")
+        for index in range(len(self.members)):
+            seed = self.members[index].genotype
+            x0 = self.members[index].phenotype[0].round(10)
+            x1 = self.members[index].phenotype[1].round(10)
+            self.logger.debug(f"| {index} | {seed} | {x0} | {x1} |")
+        # =============== END =============================
 
         # Next generation_number:
         self._generation_number += 1
@@ -99,10 +130,6 @@ class BaseGA(ABC):
 
     @ property
     def genealogies(self):
-        """
-        :return: a list of all members of the current population.
-            Only Rank==0 should be accessing this property.
-        """
         genealogies = []
         for member in self.members:
             genealogies.append(member.genotype)
@@ -110,8 +137,4 @@ class BaseGA(ABC):
 
     @ property
     def costs(self):
-        """
-        :return: scores of all members of the current population. In same order
-            as population list. Only Rank==0 should be accessing this property.
-        """
         return self.cost_list
