@@ -62,7 +62,7 @@ class BaseGA(ABC):
         for _ in range(steps):
 
             # =================== LOGGING =====================================
-            if self.verbose == 1 and self._rank == 0:
+            if self.verbose > 0 and self._rank == 0:
                 print(f"Generation: {self.generation}/{steps}")
             elif self.verbose == 2:
                 self.logger.debug(f"\nGeneration: {self.generation}/{steps}")
