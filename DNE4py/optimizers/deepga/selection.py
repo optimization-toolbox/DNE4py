@@ -30,12 +30,13 @@ class TruncatedSelection(BaseGA):
         row, column = np.where(no_parents_mask)
         no_parents_indexes = tuple(zip(row, column))
 
-        # =============== DEBUG =============================
-        self.logger.debug(f"\nSelected Parents:")
-        self.logger.debug(f"| rank | member_id |")
-        for rank, member_id in parents_indexes:
-            self.logger.debug(f"| {rank} | {member_id} |")
-        # =============== END =============================
+        # ======================= LOGGING =====================================
+        if self.verbose == 2:
+            self.logger.debug(f"\nSelected Parents:")
+            self.logger.debug(f"| rank | member_id |")
+            for rank, member_id in parents_indexes:
+                self.logger.debug(f"| {rank} | {member_id} |")
+        # ===================== END LOGGING ===================================
 
         # 2 - Update member for each rank:
         # Build message_list:
@@ -48,15 +49,16 @@ class TruncatedSelection(BaseGA):
                                    dest_rank,
                                    dest_member_id))
 
-        # =============== DEBUG =============================
-        self.logger.debug(f"\nSelection Messenger List")
-        self.logger.debug(f"| src_rank | src_member_id | dest_rank | dest_member_id |")
-        for (src_rank,
-             src_member_id,
-             dest_rank,
-             dest_member_id) in messenger_list:
-            self.logger.debug(f"| {src_rank} | {src_member_id} | {dest_rank} | {dest_member_id} |")
-        # =============== END =============================
+        # ======================= LOGGING =====================================
+        if self.verbose == 2:
+            self.logger.debug(f"\nSelection Messenger List")
+            self.logger.debug(f"| src_rank | src_member_id | dest_rank | dest_member_id |")
+            for (src_rank,
+                 src_member_id,
+                 dest_rank,
+                 dest_member_id) in messenger_list:
+                self.logger.debug(f"| {src_rank} | {src_member_id} | {dest_rank} | {dest_member_id} |")
+        # ===================== END LOGGING ===================================
 
         # Dispatch message_list:
         for (src_rank,
