@@ -21,7 +21,6 @@ foo@bar:~$ python3 -m pip install -e .
 Create main.py:
 
 ```python
-
 from DNE4py.optimizers.deepga import TruncatedRealMutatorGA
 
 def objective(x):
@@ -54,8 +53,25 @@ This will create a result folder based on output_folder
 
 ## Post-processing
 
-TODO
+You can import from utils and generate some visualizations:
+```python
+from DNE4py.utils import plot_cost_over_generation, plot_best_cost_over_generation, render_population_over_generation
+```
 
+##### plot\_cost\_over\_generation
+
+![cost over generation](https://github.com/optimization-toolbox/DNE4py/blob/master/DNE4py/examples/images/deepga_example1.png)
+
+##### plot\_best\_cost\_over\_generation
+
+![best cost over generation](https://github.com/optimization-toolbox/DNE4py/blob/master/DNE4py/examples/images/deepga_example2.png)
+
+##### render\_population\_over\_generation
+
+![render population over generation](https://github.com/optimization-toolbox/DNE4py/blob/master/DNE4py/examples/images/deepga_example3.gif)
+
+## Documentation
+TODO
 
 
 
