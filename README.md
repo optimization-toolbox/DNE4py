@@ -70,10 +70,6 @@ from DNE4py.utils import plot_cost_over_generation, plot_best_cost_over_generati
 
 ![render population over generation](https://github.com/optimization-toolbox/DNE4py/blob/master/DNE4py/examples/images/deepga_example3.gif)
 
-## Documentation
-TODO
-
-
 
 
 
