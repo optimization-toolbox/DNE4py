@@ -2,7 +2,7 @@
 
 Status: Maintenance (expect bug fixes and major updates)
 
-DNE4py is a python library that aims to run and visualize many different evolutionary algorithms with high performance using mpi4py. It allows easily evaluation of evolutionary algorithms in high dimension (e.g. neural networks for reinforcement learning) 
+DNE4py is a python library that aims to run and visualize many different evolutionary algorithms with high performance using mpi4py. It allows easy evaluation of evolutionary algorithms in high dimension (e.g. neural networks for reinforcement learning) 
 
 Implementation available:
 
@@ -11,7 +11,7 @@ Implementation available:
 ## Installation
 
 ```console
-foo@bar:~$ git clone https://github.com/optimization-toolbox/deep-neuroevolution-mpi4py
+foo@bar:~$ git clone https://github.com/optimization-toolbox/DNE4py
 foo@bar:~$ cd deep-neuroevolution-mpi4py/
 foo@bar:~$ python3 -m pip install -e .
 ```
