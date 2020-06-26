@@ -19,6 +19,22 @@ def load_mpidata(folder_path, name, nb_generations):
     full_data = np.array(full_data)
     return full_data
 
+def get_best_phenotype(folder_path, nb_generations, sigma):
+
+    from DNE4py.optimizers.deepga.mutation import Member
+
+    # Read Input:
+    costs = load_mpidata(f"{folder_path}", "costs", nb_generations)
+    genotypes = load_mpidata(f"{folder_path}", "genotypes", nb_generations)
+    initial_guess = load_mpidata(f"{folder_path}", "initial_guess", 1)[0]
+
+    # Select Best Idxs:
+    best_idxs = np.unravel_index(costs.argmin(), costs.shape)
+
+    # Create member and get phonetype:
+    phenotype = Member(initial_guess, genotypes[best_idxs], sigma).phenotype
+    return phenotype
+
 def print_statistics(folder_path, nb_generations):
 
     costs = load_mpidata(f"{folder_path}", "costs", nb_generations)
