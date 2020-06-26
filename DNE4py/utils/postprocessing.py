@@ -19,6 +19,17 @@ def load_mpidata(folder_path, name, nb_generations):
     full_data = np.array(full_data)
     return full_data
 
+def print_statistics(folder_path, nb_generations):
+
+    costs = load_mpidata(f"{folder_path}", "costs", nb_generations)
+
+    final_best_cost = np.min(costs[-1])
+    best_cost = np.min(np.min(costs, axis=1))
+
+    print(f"Final Best cost: {final_best_cost}")
+    print(f"Best cost: {best_cost}")
+
+
 def plot_cost_over_generation(folder_path, nb_generations):
 
     import matplotlib.pyplot as plt
