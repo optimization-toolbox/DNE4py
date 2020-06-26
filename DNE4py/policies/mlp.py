@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.init as init
+torch.set_default_dtype(torch.float64)
 
 
 class MLP(nn.Module):
@@ -54,7 +55,7 @@ class MLP(nn.Module):
         with torch.no_grad():
 
             # Input:
-            observation = torch.from_numpy(observation).float().flatten()
+            observation = torch.from_numpy(observation)
 
             # Sampler:
             prediction = self.model(observation)
