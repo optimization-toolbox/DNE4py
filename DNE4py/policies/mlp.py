@@ -1,16 +1,11 @@
-from collections import OrderedDict
-
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.init as init
 
-from .torchbnn import *
-# import torchbnn as bnn
 
-
-class BayesMLP(nn.Module):
-    r"""Class for Bayesian Deep Neural Network as Policy Model"""
+class MLP(nn.Module):
+    r"""Class for Deep Neural Network as Policy Model"""
 
     def __init__(self, policy_config):
 
@@ -20,16 +15,14 @@ class BayesMLP(nn.Module):
         self.activations = policy_config['activations']
 
         self.seed = policy_config['seed']
-        self.initialization = policy_config['initialization']
+        self.initialization_method = policy_config['initialization_method']
+        self.initialization_param = policy_config['initialization_param']
 
         sequential_layers = []
         for i in range(1, len(self.layers)):
             l = nn.Linear(self.layers[i - 1], self.layers[i])
-            #BayesLinear2(0.0, 1.0, 256, self.x_dim),
-
             if self.activations[i - 1] == 'tanh':
                 l2 = nn.Tanh()
-
             sequential_layers.append(l)
             sequential_layers.append(l2)
 
@@ -42,15 +35,19 @@ class BayesMLP(nn.Module):
 
     def weight_init(self, m):
 
-        if isinstance(m, nn.Linear) or isinstance(m, BayesLinear2):
+        if isinstance(m, nn.Linear):
 
             for n, param in m.named_parameters():
                 if 'bias' in n:
                     init.zeros_(param.data)
                 elif 'weight' in n:
 
-                    init.uniform_(param.data, -self.initialization, self.initialization)
-                    #init.normal_(param.data, mean=0.0, std=self.initialization)
+                    if self.initialization_method == 'uniform':
+                        init.uniform_(param.data,
+                                      -self.initialization_param,
+                                      self.initialization_param)
+                    elif self.initialization_method == 'normal':
+                        init.normal_(param.data, mean=0.0, std=self.initialization_param)
 
     def forward(self, observation):
 
