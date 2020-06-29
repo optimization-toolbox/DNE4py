@@ -50,31 +50,29 @@ def plot_cost_over_generation(folder_path, nb_generations):
 
     import matplotlib.pyplot as plt
 
+    #Load data:
     costs = load_mpidata(f"{folder_path}", "costs", nb_generations)
 
+    #Calculate data:
     means = np.mean(costs, axis=1)
     stds = np.std(costs, axis=1)
     mins = np.min(costs, axis=1)
     maxes = np.max(costs, axis=1)
 
+    #Population:
     plt.errorbar(np.arange(nb_generations), means, stds, fmt='ok', lw=3)
     plt.errorbar(np.arange(nb_generations), means, [means - mins, maxes - means],
                  fmt='.k', ecolor='gray', lw=1)
     plt.xlim(-1, nb_generations)
     plt.xticks(np.arange(-1, nb_generations + 1, 1.0))
-    plt.show()
 
-def plot_best_cost_over_generation(folder_path, nb_generations):
-
-    import matplotlib.pyplot as plt
-
-    costs = load_mpidata(f"{folder_path}", "costs", nb_generations)
-
-    mins = np.min(costs, axis=1)
+    #Best Individuals:
     plt.plot(np.arange(nb_generations), mins)
     plt.xlim(-1, nb_generations)
-    plt.xticks(np.arange(-1, nb_generations + 1, 1.0))
-    plt.show()
+    plt.xticks(np.arange(-1, nb_generations + 1, 10.0))
+
+    #Save
+    plt.savefig(f"{folder_path}/cost_over_generation.png")
 
 def render_population_over_generation(folder_path, nb_generations, objective, sigma, num_parents, num_elite):
 
