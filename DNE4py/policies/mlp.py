@@ -35,20 +35,20 @@ class MLP(nn.Module):
         torch.seed()
 
     def weight_init(self, m):
-
         if isinstance(m, nn.Linear):
-
             for n, param in m.named_parameters():
                 if 'bias' in n:
                     init.zeros_(param.data)
                 elif 'weight' in n:
-
                     if self.initialization_method == 'uniform':
                         init.uniform_(param.data,
                                       -self.initialization_param,
                                       self.initialization_param)
                     elif self.initialization_method == 'normal':
                         init.normal_(param.data, mean=0.0, std=self.initialization_param)
+                    elif self.initialization_method == 'xavier':
+                        gain = init.calculate_gain('tanh')
+                        init.xavier_normal_(param.data, gain)
 
     def forward(self, observation):
 

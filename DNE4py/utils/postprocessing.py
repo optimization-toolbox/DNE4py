@@ -35,6 +35,21 @@ def get_best_phenotype(folder_path, nb_generations, sigma):
     phenotype = Member(initial_guess, genotypes[best_idxs], sigma).phenotype
     return phenotype
 
+def get_best_phenotype_generator(folder_path, nb_generations, sigma):
+
+    from DNE4py.optimizers.deepga.mutation import Member
+
+    # Read Input:
+    costs = load_mpidata(f"{folder_path}", "costs", nb_generations)
+    genotypes = load_mpidata(f"{folder_path}", "genotypes", nb_generations)
+    initial_guess = load_mpidata(f"{folder_path}", "initial_guess", 1)[0]
+
+    # Select Best Idxs:
+    min_idxs = np.argmin(costs, axis=1)
+    for i in range(nb_generations):
+        genotype = genotypes[i, min_idxs[i]]
+        yield Member(initial_guess, genotype, sigma).phenotype
+
 def print_statistics(folder_path, nb_generations):
 
     costs = load_mpidata(f"{folder_path}", "costs", nb_generations)
@@ -46,32 +61,45 @@ def print_statistics(folder_path, nb_generations):
     print(f"Best cost: {best_cost}")
 
 
-def plot_cost_over_generation(folder_path, nb_generations):
+def plot_cost_over_generation(folder_path, nb_generations, sigma=None, test_objective=None):
 
     import matplotlib.pyplot as plt
 
-    #Load data:
+    # Load data:
     costs = load_mpidata(f"{folder_path}", "costs", nb_generations)
 
-    #Calculate data:
+    # Calculate data:
     means = np.mean(costs, axis=1)
     stds = np.std(costs, axis=1)
     mins = np.min(costs, axis=1)
     maxes = np.max(costs, axis=1)
 
-    #Population:
+    # Plot Population errorbar:
     plt.errorbar(np.arange(nb_generations), means, stds, fmt='ok', lw=3)
     plt.errorbar(np.arange(nb_generations), means, [means - mins, maxes - means],
                  fmt='.k', ecolor='gray', lw=1)
-    plt.xlim(-1, nb_generations)
-    plt.xticks(np.arange(-1, nb_generations + 1, 1.0))
 
-    #Best Individuals:
+    # Plot Best Individuals (blue line):
     plt.plot(np.arange(nb_generations), mins)
-    plt.xlim(-1, nb_generations)
-    plt.xticks(np.arange(-1, nb_generations + 1, 10.0))
 
-    #Save
+    # Plot Test Performance of Best Individuals (red line):
+    if test_objective is not None:
+        best_phenotypes = get_best_phenotype_generator(folder_path, nb_generations, sigma)
+
+        test_evaluations = []
+        for i, phenotype in enumerate(best_phenotypes):
+            if i % 4 == 0:
+                print(f'{i}/{nb_generations}\r', end='')
+                evaluation = test_objective(phenotype)
+                test_evaluations.append(evaluation)
+        test_evaluations = np.array(test_evaluations)
+        plt.plot(np.arange(0, nb_generations, 4), test_evaluations)
+
+    # Configuration:
+    plt.xlim(-1, nb_generations)
+    plt.xticks(np.arange(-1, nb_generations + 1, nb_generations // 10.0))
+
+    # Save
     plt.savefig(f"{folder_path}/cost_over_generation.png")
 
 def render_population_over_generation(folder_path, nb_generations, objective, sigma, num_parents, num_elite):
