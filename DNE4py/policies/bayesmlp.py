@@ -21,7 +21,7 @@ class BayesMLP(nn.Module):
 
         sequential_layers = []
         for i in range(1, len(self.layers)):
-            l = nn.Linear(self.layers[i - 1], self.layers[i])
+            l = BayesLinear(self.layers[i - 1], self.layers[i])
             if self.activations[i - 1] == 'tanh':
                 l2 = nn.Tanh()
             sequential_layers.append(l)
@@ -35,7 +35,7 @@ class BayesMLP(nn.Module):
         torch.seed()
 
     def weight_init(self, m):
-        if isinstance(m, nn.Linear):
+        if isinstance(m, BayesLinear):
             for n, param in m.named_parameters():
                 if 'bias' in n:
                     init.zeros_(param.data)
@@ -72,3 +72,41 @@ class BayesMLP(nn.Module):
             new_parameters = new_weights[last_slice:last_slice + size_layer_parameters].reshape(p.data.shape)
             last_slice += size_layer_parameters
             p.data = torch.from_numpy(new_parameters).detach()
+
+
+import math
+
+import torch
+from torch.nn import Module, Parameter
+import torch.nn.init as init
+import torch.nn.functional as F
+
+
+class BayesLinear(Module):
+    __constants__ = ['bias', 'in_features', 'out_features']
+
+    def __init__(self, in_features, out_features, bias=True):
+        super().__init__()
+        self.in_features = in_features
+        self.out_features = out_features
+
+        self.weight_mu = Parameter(torch.Tensor(out_features, in_features))
+
+        self.bias = bias
+        if bias:
+            self.bias_mu = Parameter(torch.Tensor(out_features))
+            self.bias_log_sigma = Parameter(torch.Tensor(out_features))
+        else:
+            print("Bias should be True")
+            exit()
+
+    def forward(self, input):
+
+        weight = self.weight_mu
+
+        bias = self.bias_mu + torch.exp(self.bias_log_sigma) * torch.randn_like(self.bias_log_sigma)
+
+        return F.linear(input, weight, bias)
+
+    def extra_repr(self):
+        return 'in_features={}, out_features={}, bias={}'.format(self.in_features, self.out_features, self.bias is not None)
