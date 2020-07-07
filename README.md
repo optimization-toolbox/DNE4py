@@ -51,25 +51,25 @@ foo@bar:~$ mpiexec -n 4 python3 main.py
 
 This will create a result folder based on output_folder
 
+##### DeepGA
+
+![DeepGA: population over generations](https://github.com/optimization-toolbox/DNE4py/blob/master/DNE4py/examples/pp_results/DeepGA/TruncatedRealMutatorGA/deepga_truncatedrealmutatorga.gif)
+
+
+##### CMA-ES
+
+![CMA-ES: population over generations](https://github.com/optimization-toolbox/DNE4py/blob/master/DNE4py/examples/pp_results/CMAES/cmaes.gif)
+
+##### RandomSearch
+
+![RandomSearch: population over generations](https://github.com/optimization-toolbox/DNE4py/blob/master/DNE4py/examples/pp_results/RandomSearch/randomsearch.gif)
+
 ## Post-processing
 
-You can import from utils and generate some visualizations:
+You can import from postprocessing.utils and generate some visualizations:
 ```python
 from DNE4py.utils import plot_cost_over_generation, plot_best_cost_over_generation, render_population_over_generation
 ```
-
-##### plot\_cost\_over\_generation
-
-![cost over generation](https://github.com/optimization-toolbox/DNE4py/blob/master/DNE4py/examples/images/deepga_example1.png)
-
-##### plot\_best\_cost\_over\_generation
-
-![best cost over generation](https://github.com/optimization-toolbox/DNE4py/blob/master/DNE4py/examples/images/deepga_example2.png)
-
-##### render\_population\_over\_generation
-
-![render population over generation](https://github.com/optimization-toolbox/DNE4py/blob/master/DNE4py/examples/images/deepga_example3.gif)
-
 
 
 
