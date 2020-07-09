@@ -102,36 +102,31 @@ def plot_cost_over_generation(folder_path, nb_generations, sigma=None, test_obje
     plt.savefig(f"{folder_path}/cost_over_generation.png")
 
 
-def save_meta_losses(folder_path, nb_generations, test_objective=None, sigma=None):
+def save_meta_losses(input_path, output_path, nb_generations, test_objective=None, sigma=None):
 
     # Graph 1 (generation x (meta_train_loss, meta_test_loss))
 
     # Meta-Train Loss:
     # Load data:
-    costs = load_mpidata(f"{folder_path}", "costs", nb_generations)
+    costs = load_mpidata(f"{input_path}", "costs", nb_generations)
 
     # Calculate data:
     meta_train_loss_y = np.min(costs, axis=1)
 
     # Meta-Test Loss:
     if test_objective is not None:
-        best_phenotypes = get_best_phenotype_generator(folder_path, nb_generations, sigma)
+        best_phenotypes = get_best_phenotype_generator(input_path, nb_generations, sigma)
 
         meta_test_loss_y = []
         for i, phenotype in enumerate(best_phenotypes):
-            if i % 5 == 0:
+            if i % 1 == 0:
                 print(f'{i}/{nb_generations}\r', end='')
                 evaluation = test_objective(phenotype)
                 meta_test_loss_y.append(evaluation)
         meta_test_loss_y = np.array(meta_test_loss_y)
 
-    try:
-        os.makedirs(f"{folder_path}/postprocessing/")
-    except:
-        pass
-
-    with open(f"{folder_path}/postprocessing/meta_train_loss_y.npy", "wb") as f:
+    with open(f"{output_path}/meta_train_loss_y.npy", "wb") as f:
         np.save(f, meta_train_loss_y)
 
-    with open(f"{folder_path}/postprocessing/meta_test_loss_y.npy", "wb") as f:
+    with open(f"{output_path}/meta_test_loss_y.npy", "wb") as f:
         np.save(f, meta_test_loss_y)
