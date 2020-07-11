@@ -4,23 +4,19 @@ from .base import BaseGA
 
 class TruncatedSelection(BaseGA):
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        # Input:
-        self._num_parents = kwargs.get('num_parents')
+    def selection_initialize(self):
 
         # Init:
         self.rgn_selection = np.random.RandomState(self.global_seed)
 
-        if self.num_elite > self._num_parents:
+        if self.num_elite > self.num_parents:
             raise AssertionError("Number of elite has to be less than the"
                                  " number of parents")
 
     def apply_selection(self, ranks_and_members_by_performance):
 
         # 1 - Define parents and no parents:
-        parents_mask = ranks_and_members_by_performance < self._num_parents
+        parents_mask = ranks_and_members_by_performance < self.num_parents
         no_parents_mask = np.invert(parents_mask)
 
         row, column = np.where(parents_mask)

@@ -1,3 +1,6 @@
-from .optimizers import deepga
-from .utils import *
-from .postprocessing import *
+from DNE4py import (optimizers, utils)
+
+__all__ = [
+    "optimizers",
+    "utils",
+]

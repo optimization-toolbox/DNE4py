@@ -6,9 +6,25 @@ from abc import ABC, abstractmethod
 
 from DNE4py.utils import MPIData, MPILogger
 
-class BaseGA(ABC):
+from DNE4py.optimizers.optimizer import Optimizer
+#from .mutation import RealMutator
+#from .selection import TruncatedSelection
 
-    def __init__(self, **kwargs):
+class BaseGA(Optimizer):
+
+    def __init__(self, objective_function, config):
+
+        super().__init__(objective_function, config)
+
+        # self.initial_guess
+        # workers_per_rank
+        # num_elite
+        # num_parents
+        # sigma
+        # seed
+        # save
+        # verbose
+        # output_folder
 
         # Initiate MPI
         from mpi4py import MPI
@@ -17,21 +33,13 @@ class BaseGA(ABC):
         self._size = self._comm.Get_size()
         self._rank = self._comm.Get_rank()
 
-        # Input:
-        self.objective = kwargs.get('objective')
-        self.initial_guess = kwargs.get('initial_guess')
-        self.num_elite = kwargs.get('num_elite')
-        self.global_seed = kwargs.get('seed')
-
-        self.save = kwargs.get('save', 0)
-        self.verbose = kwargs.get('verbose', 0)
-        self.output_folder = kwargs.get('output_folder', 'DNE4py_result')
-
-        self.workers_per_rank = kwargs.get('workers_per_rank')
-        self.population_size = self._size * self.workers_per_rank
+        # mutator and selection
+        self.mutator_initialize()
+        self.selection_initialize()
 
         # Internal:
         self.generation = 0
+        self.population_size = self._size * self.workers_per_rank
 
         # Logger and DataCollector for MPI:
         if (self.verbose == 2) or (self.save > 0):
@@ -49,11 +57,11 @@ class BaseGA(ABC):
                                                     'initial_guess',
                                                     0)
 
-    @abstractmethod
+    #@abstractmethod
     def apply_selection(self, ranks_by_performance):
         pass
 
-    @abstractmethod
+    #@abstractmethod
     def apply_mutation(self, ranks_by_performance):
         pass
 
@@ -75,7 +83,7 @@ class BaseGA(ABC):
         # Evaluate member:
         self.cost_list = np.zeros(self.workers_per_rank)
         for i in range(len(self.cost_list)):
-            self.cost_list[i] = self.objective(self.members[i].phenotype)
+            self.cost_list[i] = self.objective_function(self.members[i].phenotype)
 
         # ======================= LOGGING =====================================
         if self.verbose == 2:

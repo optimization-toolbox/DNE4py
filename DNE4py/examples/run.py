@@ -3,14 +3,14 @@ import numpy as np
 
 from DNE4py.optimizers.deepga import TruncatedRealMutatorGA
 from DNE4py.optimizers.cmaes import CMAES
-from DNE4py.optimizers.random_search import RandomSearch
+from DNE4py.optimizers.random import BatchRandomSearch
 
 
-def objective(x):
+def objective_function(x):
     result = np.sum(x**2)
     return result
 
-def get_DeepGA_TruncatedRealMutatorGA():
+def get_deepga_TruncatedRealMutatorGA():
 
     initial_guess = np.array([-0.3, 0.7])
     workers_per_rank = 10
@@ -19,50 +19,50 @@ def get_DeepGA_TruncatedRealMutatorGA():
     sigma = 0.05
     seed = 100
 
-    optimizer = TruncatedRealMutatorGA(objective=objective,
-                                       initial_guess=initial_guess,
-                                       workers_per_rank=workers_per_rank,
-                                       num_elite=num_elite,
-                                       num_parents=num_parents,
-                                       sigma=sigma,
-                                       seed=seed,
-                                       save=1,
-                                       verbose=1,
-                                       output_folder='results/DeepGA/TruncatedRealMutatorGA')
+    optimizer = TruncatedRealMutatorGA(objective_function,
+                                       {'initial_guess': initial_guess,
+                                        'workers_per_rank': workers_per_rank,
+                                        'num_elite': num_elite,
+                                        'num_parents': num_parents,
+                                        'sigma': sigma,
+                                        'global_seed': seed,
+                                        'save': 1,
+                                        'verbose': 1,
+                                        'output_folder': 'results/DeepGA/TruncatedRealMutatorGA'})
     return optimizer
 
-def get_CMAES():
+def get_cmaes_CMAES():
 
     initial_guess = np.array([-0.3, 0.7])
     workers_per_rank = 10
     sigma = 0.05
     seed = 100
 
-    optimizer = CMAES(objective=objective,
-                      initial_guess=initial_guess,
-                      workers_per_rank=workers_per_rank,
-                      sigma=sigma,
-                      seed=seed,
-                      save=1,
-                      verbose=1,
-                      output_folder='results/CMAES')
+    optimizer = CMAES(objective_function,
+                      {'initial_guess': initial_guess,
+                       'workers_per_rank': workers_per_rank,
+                       'sigma': sigma,
+                       'global_seed': seed,
+                       'save': 1,
+                       'verbose': 1,
+                       'output_folder': 'results/CMAES'})
     return optimizer
 
-def get_RandomSearch():
+def get_random_BatchRandomSearch():
 
-    initial_guess = np.array([-0.3, 0.7])
+    dim = 2
     workers_per_rank = 10
     bounds = np.array((-1, 1))
-    seed = 100
+    global_seed = 100
 
-    optimizer = RandomSearch(objective=objective,
-                             initial_guess=np.array([-0.3, 0.7]),
-                             bounds=bounds,
-                             workers_per_rank=workers_per_rank,
-                             seed=seed,
-                             save=1,
-                             verbose=1,
-                             output_folder='results/RandomSearch')
+    optimizer = BatchRandomSearch(objective_function,
+                                  {'dim': dim,
+                                   'bounds': bounds,
+                                   'workers_per_rank': workers_per_rank,
+                                   'global_seed': global_seed,
+                                   'save': 1,
+                                   'verbose': 1,
+                                   'output_folder': 'results/BatchRandomSearch'})
     return optimizer
 
 
@@ -70,9 +70,9 @@ if "__main__" == __name__:
 
     # Options:
     switcher = {
-        0: get_DeepGA_TruncatedRealMutatorGA,
-        1: get_CMAES,
-        2: get_RandomSearch
+        0: get_deepga_TruncatedRealMutatorGA,
+        1: get_cmaes_CMAES,
+        2: get_random_BatchRandomSearch
     }
     optimizer = switcher.get(int(sys.argv[1]), lambda: "Invalid index for optimizer")()
     optimizer.run(20)
