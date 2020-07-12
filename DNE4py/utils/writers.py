@@ -13,9 +13,20 @@ class MPIWriter:
         self.folder_path = folder_path
         self.name = name
 
-        self.filename = f'{folder_path}/{name}_w{rank}'
+        self.filename = f'{folder_path}/raw_data/{name}_w{rank}'
 
-        assert os.path.isdir(folder_path) == True, f'You should create the folder: {folder_path}'
+
+        try:
+            os.makedirs(f'{folder_path}/raw_data/')
+        except:
+            pass
+        #assert os.path.isdir(folder_path) == True, f'You should create the folder: {folder_path}'
+
+        #try:
+        #    os.makedirs(f'{folder_path}/raw_data/')
+        #except:
+        #    pass
+
         os.path.isfile(self.filename)
 
 
@@ -25,7 +36,7 @@ class MPIData(MPIWriter):
         super().__init__(folder_path, name, rank)
         self.filename += '.pkl'
 
-        assert os.path.isfile(self.filename) == False, f'You should delete all files inside the folder: {folder_path}'
+        assert os.path.isfile(self.filename) == False, f'You should delete raw_data folder in: {folder_path}'
 
     def write(self, data):
         with open(self.filename, 'ab') as f:
