@@ -21,10 +21,10 @@ class BaseGA(Optimizer):
         # num_elite
         # num_parents
         # sigma
-        # seed
+        # output_folder
+        # global_seed
         # save
         # verbose
-        # output_folder
 
         # Initiate MPI
         from mpi4py import MPI
