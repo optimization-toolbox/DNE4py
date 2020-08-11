@@ -1,11 +1,12 @@
 
 from .deepga import TruncatedRealMutatorGA
-from .friedman_deepga import TruncatedRealMutatorFriedmanGA
+from .deepga2 import TruncatedRealMutatorCompactGA, TruncatedRealMutatorCompositeGA
 from .cmaes import CMAES
 from .random import BatchRandomSearch
 
 __all__ = [
-    "TruncatedRealMutatorFriedmanGA",
+    "TruncatedRealMutatorCompactGA",
+    "TruncatedRealMutatorCompositeGA"
     "TruncatedRealMutatorGA",
     "CMAES",
     "BatchRandomSearch",
