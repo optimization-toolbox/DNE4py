@@ -10,6 +10,11 @@ from DNE4py.optimizers.optimizer import Optimizer
 #from .mutation import RealMutator
 #from .selection import TruncatedSelection
 
+#TO BE removed (@genotypes deprecated):
+import warnings
+warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
+
+
 class BaseGA(Optimizer):
 
     def __init__(self, objective_function, config):
@@ -154,7 +159,7 @@ class BaseGA(Optimizer):
         genotypes = []
         for member in self.members:
             genotypes.append(member.genotype)
-        return np.array(genotypes, dtype=object)
+        return np.array(genotypes)
 
     @ property
     def costs(self):
