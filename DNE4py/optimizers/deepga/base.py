@@ -154,7 +154,7 @@ class BaseGA(Optimizer):
         genotypes = []
         for member in self.members:
             genotypes.append(member.genotype)
-        return np.array(genotypes)
+        return np.array(genotypes, dtype=object)
 
     @ property
     def costs(self):
