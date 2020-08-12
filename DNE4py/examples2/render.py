@@ -5,7 +5,7 @@
 
 import pickle
 
-from scipy.stats import multivariate_normal, rankdata, find_repeats
+from scipy.stats import multivariate_normal, find_repeats
 
 
 from DNE4py.postprocessing.utils import load_mpidata
@@ -258,8 +258,15 @@ def composite_deepga_render(folder_path, nb_generations, objective, sigma, num_p
         for genotype in genotypes[g]:
             phenotype = Member(initial_guess, genotype, sigma).phenotype
             phenotypes.append(phenotype)
-        phenotypes = np.array(phenotypes)
+        phenotypes = np.array
+    seed = 100
 
+    optimizer = TruncatedRealMutatorCompositeGA(composite_objective_function,
+                                       {'initial_guess': initial_guess,
+                                        'workers_per_rank': workers_per_rank,
+                                        'num_elite': num_elite,
+                                        'num_parents': num_parents,
+                                        'sigma': sigma,
         ax.scatter(phenotypes[:, 0], phenotypes[:, 1], c='black', s=10)
         plt.savefig(f"pp_{folder_path}/{g+1}_1.jpeg")
 
@@ -285,4 +292,41 @@ def composite_deepga_render(folder_path, nb_generations, objective, sigma, num_p
         ax.scatter(phenotypes[:, 0], phenotypes[:, 1], c='red', s=10)
         plt.savefig(f"pp_{folder_path}/{g+1}_3.jpeg")
 
+# Move somewhere else
+def rankdata(a):
+    """Ranks the data in a, dealing with ties appropriately.
+    Equal values are assigned a rank that is the average of the ranks that
+    would have been otherwise assigned to all of the values within that set.
+    Ranks begin at 1, not 0.
+    Example:
+      In [15]: stats.rankdata([0, 2, 2, 3])
+      Out[15]: array([ 1. ,  2.5,  2.5,  4. ])
+    Parameters:
+      - *a* : array
+        This array is first flattened.
+    Returns:
+      An array of length equal to the size of a, containing rank scores.
+    """
+    a = np.ravel(a)
+    n = len(a)
+    svec, ivec = fastsort(a)
+    sumranks = 0
+    dupcount = 0
+    newarray = np.zeros(n, float)
+    for i in range(n):
+        sumranks += i
+        dupcount += 1
+        if i == n - 1 or svec[i] != svec[i + 1]:
+            averank = sumranks / float(dupcount) + 1
+            for j in range(i - dupcount + 1, i + 1):
+                newarray[ivec[j]] = averank
+            sumranks = 0
+            dupcount = 0
+    return newarray
+# Dimensions
+# Calcul des ranks (non trivial dans le cas composite)
 
+def fastsort(a):
+     it = np.argsort(a)
+     as_ = a[it]
+     return as_, it
