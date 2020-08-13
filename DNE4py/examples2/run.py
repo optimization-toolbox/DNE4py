@@ -67,7 +67,7 @@ def get_random_BatchRandomSearch():
 
 
 # Composite example task
-def composite_objective_function(x, n_tasks=10):
+def composite_objective_function(x, n_tasks=50):
     """
     The composite objective is composed of n_tasks functions of the form f_i:(x,y) -> (x^2 + y^2) + i 
     for i in {-n_task/2, ..., n_task/2}.

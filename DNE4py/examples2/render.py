@@ -6,7 +6,7 @@
 import pickle
 
 from scipy.stats import multivariate_normal, find_repeats
-
+import numpy as np
 
 from DNE4py.postprocessing.utils import load_mpidata
 from DNE4py.optimizers.cmaes import CMAES
@@ -258,15 +258,8 @@ def composite_deepga_render(folder_path, nb_generations, objective, sigma, num_p
         for genotype in genotypes[g]:
             phenotype = Member(initial_guess, genotype, sigma).phenotype
             phenotypes.append(phenotype)
-        phenotypes = np.array
-    seed = 100
 
-    optimizer = TruncatedRealMutatorCompositeGA(composite_objective_function,
-                                       {'initial_guess': initial_guess,
-                                        'workers_per_rank': workers_per_rank,
-                                        'num_elite': num_elite,
-                                        'num_parents': num_parents,
-                                        'sigma': sigma,
+        phenotypes = np.array(phenotypes)
         ax.scatter(phenotypes[:, 0], phenotypes[:, 1], c='black', s=10)
         plt.savefig(f"pp_{folder_path}/{g+1}_1.jpeg")
 

@@ -56,7 +56,9 @@ class BaseGA(Optimizer):
                 self.mpidata_initialguess = MPIData(self.output_folder,
                                                     'initial_guess',
                                                     0)
-   
+                self.mpidata_rankings = MPIData(self.output_folder,
+                                                'rankings',
+                                                self._rank)
     #@abstractmethod
     def apply_ranking(self, ranks_by_performance):
         pass
@@ -122,6 +124,8 @@ class BaseGA(Optimizer):
         self.mpidata_genotypes.write(self.genotypes)
         self.mpidata_costs.write(self.costs)
         if s == 0: 
+            print("WRITE INTIAL GUESS")
+            print(self.initial_guess)
             self.mpidata_initialguess.write(self.initial_guess)
 
     @ property

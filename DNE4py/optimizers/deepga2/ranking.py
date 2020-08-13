@@ -1,7 +1,7 @@
 import numpy as np
 
 from .base import BaseGA
-
+from DNE4py.utils import MPIData
 # class Ranking(BaseGA):
 #     def ranking_initialize(self):
 #         self.n_tasks = len(self.objective_function(self.members[0].phenotype))
@@ -76,20 +76,21 @@ class CompactRanking(BaseGA):
                              [cost_matrix, self._MPI.FLOAT])
 
         # Truncate Selection (broadcast genotypes and update members):
-        order = np.argsort(cost_matrix.flatten()) # le reshape + le order
+        order = np.argsort(cost_matrix.flatten())
         rank = np.argsort(order)
         ranks_and_members_by_performance = rank.reshape(cost_matrix.shape)
         return ranks_and_members_by_performance
 
 
 class CompositeRanking(BaseGA):
+
     def apply_ranking(self):
         
         # Evaluate member:
         self.cost_list = [] #--#
         for i in range(self.workers_per_rank):
             self.cost_list.append(self.objective_function(self.members[i].phenotype))
-        self.cost_list = np.array(self.cost_list )
+        self.cost_list = np.array(self.cost_list)
         self.n_tasks = self.cost_list.shape[1] 
 
         # ======================= LOGGING =====================================
@@ -104,9 +105,7 @@ class CompositeRanking(BaseGA):
                 self.logger.debug(f"| {index} | {seed} | {x0} | {x1} | {y} |")
         # ===================== END LOGGING ===================================
 
-        # Save:
-        if (self.save > 0) and (self.generation % self.save == 0):
-            self.mpi_save(self.generation)
+
 
         # Broadcast fitness:
         cost_matrix = np.empty((self._size, self.workers_per_rank, self.n_tasks)) #--#
@@ -115,7 +114,14 @@ class CompositeRanking(BaseGA):
 
         # Compute "on instances" average rankings   
         average_ranking = self.ranking(cost_matrix)
-    
+
+        # Save:
+        if (self.save > 0) and (self.generation % self.save == 0):
+            self.mpi_save(self.generation)
+
+            # add the specific ranking data
+            self.mpidata_rankings.write(average_ranking)
+
         # Truncate Selection (broadcast genotypes and update members):
         order = np.argsort(average_ranking) #--#
         rank = np.argsort(order)
