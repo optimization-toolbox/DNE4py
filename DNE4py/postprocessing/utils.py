@@ -16,7 +16,10 @@ def load_mpidata(folder_path, name, nb_generations):
             for g in range(nb_generations):
                 worker_data = pickle.load(f).tolist()
                 full_data[g] = full_data[g] + worker_data
-    full_data = np.array(full_data)
+    if name == 'genotypes':
+        full_data = np.array(full_data, dtype=object)
+    else:
+        full_data = np.array(full_data)
     return full_data
 
 def get_best_phenotype(folder_path, nb_generations, sigma):
