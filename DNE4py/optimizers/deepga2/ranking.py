@@ -106,7 +106,8 @@ class CompositeRanking(BaseGA):
         # ===================== END LOGGING ===================================
 
 
-
+        if (self.save > 0) and (self.generation % self.save == 0):
+            self.mpi_save(self.generation)
         # Broadcast fitness:
         cost_matrix = np.empty((self._size, self.workers_per_rank, self.n_tasks)) #--#
         self._comm.Allgather([self.cost_list, self._MPI.FLOAT],
@@ -116,9 +117,8 @@ class CompositeRanking(BaseGA):
         average_ranking = self.ranking(cost_matrix)
 
         # Save:
+  
         if (self.save > 0) and (self.generation % self.save == 0):
-            self.mpi_save(self.generation)
-
             # add the specific ranking data
             self.mpidata_rankings.write(average_ranking)
 

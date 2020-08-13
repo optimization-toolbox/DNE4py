@@ -37,6 +37,26 @@ def get_best_phenotype(folder_path, nb_generations, sigma):
     phenotype = Member(initial_guess, genotypes[best_idxs], sigma).phenotype
     return phenotype
 
+def get_best_phenotype_composite(folder_path, nb_generations, sigma):
+
+    from DNE4py.optimizers.deepga.mutation import Member
+
+    # Read Input:
+    rankings = load_mpidata(f"{folder_path}", "rankings", nb_generations) 
+    genotypes = load_mpidata(f"{folder_path}", "genotypes", nb_generations)
+    initial_guess = load_mpidata(f"{folder_path}", "initial_guess", 1)[0]
+
+    best_idxs = np.unravel_index(rankings.argmin(), rankings.shape)
+
+    # Create member and get phonetype:
+    phenotype = Member(initial_guess, genotypes[best_idxs], sigma).phenotype
+    return phenotype
+
+    # # Read Input:
+    # if loss_type == "compact":
+    #     costs = load_mpidata(f"{folder_path}", "costs", nb_generations)
+    # elif loss_type == "composite":
+    #     costs = load_mpidata(f"{folder_path}", "costs", nb_generations)
 def get_best_phenotype_generator(folder_path, nb_generations, sigma):
 
     from DNE4py.optimizers.deepga.mutation import Member
@@ -63,7 +83,7 @@ def get_best_phenotype_generator_composite(folder_path, nb_generations, sigma):
     initial_guess = load_mpidata(f"{folder_path}", "initial_guess", 1)[0]
 
     # Select Best Idxs:
-    min_idxs = np.argmax(rankings, axis=1)
+    min_idxs = np.argmin(rankings, axis=1)
     for i in range(nb_generations):
         genotype = genotypes[i, min_idxs[i]]
         yield Member(initial_guess, genotype, sigma).phenotype

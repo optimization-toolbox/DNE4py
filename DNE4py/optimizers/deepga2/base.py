@@ -124,8 +124,6 @@ class BaseGA(Optimizer):
         self.mpidata_genotypes.write(self.genotypes)
         self.mpidata_costs.write(self.costs)
         if s == 0: 
-            print("WRITE INTIAL GUESS")
-            print(self.initial_guess)
             self.mpidata_initialguess.write(self.initial_guess)
 
     @ property
