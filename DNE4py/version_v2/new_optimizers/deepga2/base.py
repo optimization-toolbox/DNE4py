@@ -56,7 +56,9 @@ class BaseGA(Optimizer):
                 self.mpidata_initialguess = MPIData(self.output_folder,
                                                     'initial_guess',
                                                     0)
-   
+                self.mpidata_rankings = MPIData(self.output_folder,
+                                                'rankings',
+                                                self._rank)
     #@abstractmethod
     def apply_ranking(self, ranks_by_performance):
         pass
