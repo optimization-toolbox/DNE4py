@@ -1,35 +1,49 @@
 import numpy as np
-import pickle
+import json
 import random
 
 from abc import ABC, abstractmethod
 
-from DNE4py.utils import MPIData, MPILogger
+from DNE4py.mpi_extensions import MPISaver, MPILogger
 
-from DNE4py.optimizers.optimizer import Optimizer
-#from .mutation import RealMutator
-#from .selection import TruncatedSelection
+#from DNE4py.optimizers.optimizer import Optimizer
 
-#TO BE removed (@genotypes deprecated):
-import warnings
-warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
+class BaseGA:
 
+    r'''
+    Example config:
 
-class BaseGA(Optimizer):
+    id: TruncatedRealMutatorGA
+    initial_guess = np.array([-0.3, 0.7])
+    workers_per_rank: 10
+    num_elite: 3
+    num_parents: 5
+    sigma: 0.05
+    global_seed: 42
+    output_folder: 'results/DeepGA/TruncatedRealMutatorGA'
+    verbose: 0
 
-    def __init__(self, objective_function, config):
+    Description:
 
-        super().__init__(objective_function, config)
+    * output_folder (int)
+        => path for the raw_data that will be processed with 
+    postprocessing module
 
-        # self.initial_guess
-        # workers_per_rank
-        # num_elite
-        # num_parents
-        # sigma
-        # output_folder
-        # global_seed
-        # save
-        # verbose
+    * save_steps (int)
+        => save per each save_steps generations
+
+    * verbose (int)
+        => 0 no printing
+        => 1 print number of generations with rank 0
+        => 2 save debug file
+
+    '''
+
+    def __init__(self, config):
+
+        # config.get('env_options').get('max_iteration')
+
+        # super().__init__(**config)
 
         # Initiate MPI
         from mpi4py import MPI
@@ -38,7 +52,21 @@ class BaseGA(Optimizer):
         self._size = self._comm.Get_size()
         self._rank = self._comm.Get_rank()
 
-        # mutator and selection
+        # Configuration:
+        self.id = config.get('id')
+        self.workers_per_rank = config.get('workers_per_rank')
+        self.num_elite = config.get('num_elite')
+        self.num_parents = config.get('num_parents')
+        self.sigma = config.get('sigma')
+        self.global_seed = config.get('global_seed')
+
+        self.output_folder = config.get('output_folder')
+        self.save_steps = config.get('save_steps')
+        self.verbose = config.get('verbose')
+
+        self.initial_guess = config.get('initial_guess')
+
+        # Initialize Mutator and Selection
         self.mutator_initialize()
         self.selection_initialize()
 
@@ -47,20 +75,15 @@ class BaseGA(Optimizer):
         self.population_size = self._size * self.workers_per_rank
 
         # Logger and DataCollector for MPI:
-        if (self.verbose == 2) or (self.save > 0):
+        # if self.extra_options.get('output_folder') != None:
+        #    self.logger = MPILogger(self.output_folder, 'debug_logger', self._rank)
 
-            if self.verbose == 2:
-                self.logger = MPILogger(self.output_folder, 'debug_logger', self._rank)
-            if self.save > 0:
-                self.mpidata_genotypes = MPIData(self.output_folder,
-                                                 'genotypes',
-                                                 self._rank)
-                self.mpidata_costs = MPIData(self.output_folder,
-                                             'costs',
-                                             self._rank)
-                self.mpidata_initialguess = MPIData(self.output_folder,
-                                                    'initial_guess',
-                                                    0)
+        if self.output_folder != None:
+
+            self.saver_genotypes = MPISaver(f'{self.output_folder}/genotypes_w{self._rank}.npy')
+            self.saver_costs = MPISaver(f'{self.output_folder}/costs_w{self._rank}.npy')
+        if self._rank == 0:
+            self.saver_initialguess = MPISaver(f'{self.output_folder}/initial_guess.npy')
 
     #@abstractmethod
     def apply_selection(self, ranks_by_performance):
@@ -70,18 +93,32 @@ class BaseGA(Optimizer):
     def apply_mutation(self, ranks_by_performance):
         pass
 
-    def run(self, steps):
+    def run(self, objective_function, steps):
+
+        self.objective_function = objective_function
+
+        if self._rank == 0:
+            self.saver_initialguess.write(self.initial_guess)
 
         for _ in range(steps):
 
             # =================== LOGGING =====================================
-            if self.verbose > 0 and self._rank == 0:
-                print(f"Generation: {self.generation}/{steps}")
+            if self.verbose == 1:
+                if self._rank == 0:
+                    print(f"Generation: {self.generation}/{steps}")
             elif self.verbose == 2:
                 self.logger.debug(f"\nGeneration: {self.generation}/{steps}")
             # =================== LOGGING =====================================
 
             self.step()
+
+        # CLOSING:
+        if self._rank == 0:
+            if self.output_folder != None:
+                info = {'nb_generations': steps,
+                        'sigma': self.sigma}
+                with open(f'{self.output_folder}/info.json', "w") as f:
+                    json.dump(info, f)
 
     def step(self):
 
@@ -102,9 +139,14 @@ class BaseGA(Optimizer):
                 self.logger.debug(f"| {index} | {seed} | {x0} | {x1} | {y} |")
         # ===================== END LOGGING ===================================
 
-        # Save:
-        if (self.save > 0) and (self.generation % self.save == 0):
-            self.mpi_save(self.generation)
+        # ======================= SAVING =====================================
+        if (self.generation % self.save_steps == 0):
+            self.saver_genotypes.write(self.genotypes)
+            self.saver_costs.write(self.costs)
+        else:
+            self.saver_genotypes.write(np.array(np.nan))
+            self.saver_costs.write(np.array(np.nan))
+        # ===================== END SAVING ===================================
 
         # Broadcast fitness:
         cost_matrix = np.empty((self._size, self.workers_per_rank))
@@ -147,19 +189,12 @@ class BaseGA(Optimizer):
         # Next generation:
         self.generation += 1
 
-    def mpi_save(self, s):
-
-        self.mpidata_genotypes.write(self.genotypes)
-        self.mpidata_costs.write(self.costs)
-        if s == 0:
-            self.mpidata_initialguess.write(self.initial_guess)
-
     @ property
     def genotypes(self):
         genotypes = []
         for member in self.members:
             genotypes.append(member.genotype)
-        return np.array(genotypes)
+        return np.array(genotypes, dtype=object)
 
     @ property
     def costs(self):

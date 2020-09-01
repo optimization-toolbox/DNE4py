@@ -53,22 +53,22 @@ This will create a result folder based on output_folder
 
 ##### DeepGA
 
-![DeepGA: population over generations](https://github.com/optimization-toolbox/DNE4py/blob/master/DNE4py/examples/pp_results/DeepGA/TruncatedRealMutatorGA/deepga_truncatedrealmutatorga.gif)
+![DeepGA: population over generations](https://github.com/optimization-toolbox/DNE4py/blob/master/DNE4py/tutorials/pp_results/gif/deepga_truncatedrealmutatorga.gif)
 
 
 ##### CMA-ES
 
-![CMA-ES: population over generations](https://github.com/optimization-toolbox/DNE4py/blob/master/DNE4py/examples/pp_results/CMAES/cmaes.gif)
+![CMA-ES: population over generations](https://github.com/optimization-toolbox/DNE4py/blob/master/DNE4py/tutorials/gif/cmaes.gif)
 
 ##### RandomSearch
 
-![RandomSearch: population over generations](https://github.com/optimization-toolbox/DNE4py/blob/master/DNE4py/examples/pp_results/RandomSearch/randomsearch.gif)
+![RandomSearch: population over generations](https://github.com/optimization-toolbox/DNE4py/blob/master/DNE4py/tutorials/gif/randomsearch.gif)
 
 ## Post-processing
 
-You can import from postprocessing.utils and generate some visualizations:
+You can import and generate some visualizations:
 ```python
-from DNE4py.utils import plot_cost_over_generation, plot_best_cost_over_generation, render_population_over_generation
+from DNE4py import load_mpidata, get_best_phenotype, get_best_phenotype_generator
 ```
 
 

@@ -1,7 +1,7 @@
 import numpy as np
 
 from ..optimizer import Optimizer
-from DNE4py.utils import MPIData, MPILogger
+from DNE4py.utils.mpi_extensions import MPISaver, MPILogger
 import cma
 
 

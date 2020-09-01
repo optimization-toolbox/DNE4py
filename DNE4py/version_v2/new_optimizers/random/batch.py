@@ -5,7 +5,7 @@ import numpy as np
 #from abc import ABC, abstractmethod
 
 from ..optimizer import Optimizer
-from DNE4py.utils import MPIData, MPILogger
+from DNE4py.utils.mpi_extensions import MPISaver, MPILogger
 
 class BatchRandomSearch(Optimizer):
 

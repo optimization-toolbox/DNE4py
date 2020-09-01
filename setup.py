@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="DNE4py",
-    version="0.0.1",
+    version="0.0.2",
     author="Hugo Dovs",
     author_email="hugodovs@gmail.com",
     description="DNE4py: Deep Neuroevolution Algorithms using mpi4py",

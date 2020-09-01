@@ -1,0 +1,12 @@
+optimizer:
+  id: TruncatedRealMutatorGA
+  workers_per_rank: 10
+  num_elite: 3
+  num_parents: 5
+  sigma: 0.05
+  global_seed: 42
+  output_folder: 'results/TruncatedRealMutatorGA'
+  save_steps: 1
+  verbose: 0
+
+
