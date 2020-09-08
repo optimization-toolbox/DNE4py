@@ -26,6 +26,7 @@ class MPILogger:
 
     def __init__(self, file_path):
 
+        self.file_path = file_path
         folder_path, filename = os.path.split(file_path)
 
         try:
@@ -33,9 +34,9 @@ class MPILogger:
         except:
             pass
 
-        assert os.path.isfile(self.file_path) == False, f'You should delete all files inside the folder: {folder_path}'
+        assert os.path.isfile(self.file_path) == False, f'You should delete all files inside the folder: {self.folder_path} | {self.file_path}'
 
-        logging.basicConfig(file_path=self.file_path,
+        logging.basicConfig(filename=self.file_path,
                             level=logging.DEBUG,
                             format='%(message)s')
 

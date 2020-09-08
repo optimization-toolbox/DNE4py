@@ -75,13 +75,14 @@ class BaseGA:
         self.population_size = self._size * self.workers_per_rank
 
         # Logger and DataCollector for MPI:
-        # if self.extra_options.get('output_folder') != None:
-        #    self.logger = MPILogger(self.output_folder, 'debug_logger', self._rank)
+
+        if self.output_folder != None and self.verbose == 2:
+            self.logger = MPILogger(f'{self.output_folder}/info_w{self._rank}.log')
 
         if self.output_folder != None:
-
             self.saver_genotypes = MPISaver(f'{self.output_folder}/genotypes_w{self._rank}.npy')
             self.saver_costs = MPISaver(f'{self.output_folder}/costs_w{self._rank}.npy')
+
         if self._rank == 0:
             self.saver_initialguess = MPISaver(f'{self.output_folder}/initial_guess.npy')
 

@@ -2,6 +2,7 @@ import sys
 import numpy as np
 
 from DNE4py import load_mpidata, get_best_phenotype, get_best_phenotype_generator
+import matplotlib.pyplot as plt
 
 
 def objective_function(x):
@@ -14,10 +15,23 @@ if "__main__" == __name__:
     genotypes = load_mpidata('genotypes', 'results/TruncatedRealMutatorGA/')
     initial_guess = load_mpidata('initial_guess', 'results/TruncatedRealMutatorGA/')
 
+    # for i, c in enumerate(costs):
+    #     print(i)
+    #     print(f'{np.min(c)}')
+    #     print(f'{c}')
+    #     print()
+
+    print(f'costs shape: {costs.shape}')
+    print(f'genotypes shape: {genotypes.shape}')
+    print(f'initial_guess shape: {initial_guess.shape}')
+
     x = get_best_phenotype('results/TruncatedRealMutatorGA/')
-    print(x)
+    # print(x)
 
     generator = get_best_phenotype_generator('results/TruncatedRealMutatorGA/')
 
-    for i in generator:
-        print(i)
+    y = np.min(costs, axis=1)
+    plt.plot(y)
+    plt.show()
+    # for i in generator:
+    #    print(i)

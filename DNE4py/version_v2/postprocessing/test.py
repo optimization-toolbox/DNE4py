@@ -21,6 +21,7 @@ with open('test.npy', 'ab') as f:
     np.save(f, b)
 
 with open('test.npy', 'rb') as f:
+    print('!!!')
     for _ in range(2):
         print(np.load(f, allow_pickle=True))
 print()

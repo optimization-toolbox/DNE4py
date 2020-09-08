@@ -21,12 +21,17 @@ def load_mpidata(name, folder_path):
 
     # Get data:
     if name in ['costs', 'genotypes']:
-        data = [[]] * nb_generations
-        for w in range(nb_files):
-            with open(f'{folder_path}/{name}_w{w}.npy', 'rb') as f:
+        data = [[] for i in range(nb_files)]
+        for i in range(nb_files):
+            generation_data = []
+            with open(f'{folder_path}/{name}_w{i}.npy', 'rb') as f:
                 for g in range(nb_generations):
-                    data[g] = np.load(f, allow_pickle=True).tolist()
-        return np.array(data, object)
+                    generation_data.append(np.load(f, allow_pickle=True).tolist())
+            data[i] = generation_data
+        data = np.array(data, object)
+        data = np.transpose(data, (1, 0, 2))
+        data = data.reshape((data.shape[0], data.shape[1] * data.shape[2]))
+        return data
     elif name in ['initial_guess']:
         with open(f'{folder_path}/initial_guess.npy', 'rb') as f:
             return np.load(f, allow_pickle=True)
