@@ -46,9 +46,9 @@ def get_best_phenotype(folder_path):
     from DNE4py.optimizers.deepga.mutation import Member
 
     # Internals:
-    with open(f'{folder_path}/info.json', 'rb') as f:
-        info = json.load(f)
-    sigma = info['sigma']
+#    with open(f'{folder_path}/info.json', 'rb') as f:
+#        info = json.load(f)
+#    sigma = info['sigma']
 
     # Read Input:
     costs = load_mpidata("costs", f"{folder_path}")
@@ -59,7 +59,7 @@ def get_best_phenotype(folder_path):
     best_idx = np.unravel_index(costs.argmin(), costs.shape)
 
     # Create member and get phonetype:
-    phenotype = Member(initial_guess, genotypes[best_idx], sigma).phenotype
+    phenotype = Member(initial_guess, genotypes[best_idx]).phenotype
     return phenotype
 
 def get_best_phenotype_generator(folder_path):
@@ -71,7 +71,6 @@ def get_best_phenotype_generator(folder_path):
     # Internals:
     with open(f'{folder_path}/info.json', 'rb') as f:
         info = json.load(f)
-    sigma = info['sigma']
     nb_generations = info['nb_generations']
 
     # Read Input:
@@ -83,4 +82,4 @@ def get_best_phenotype_generator(folder_path):
     min_idxs = np.argmin(costs, axis=1)
     for i in range(nb_generations):
         genotype = genotypes[i, min_idxs[i]]
-        yield Member(initial_guess, genotype, sigma).phenotype
+        yield Member(initial_guess, genotype).phenotype

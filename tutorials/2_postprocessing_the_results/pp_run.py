@@ -25,8 +25,17 @@ if "__main__" == __name__:
     print(f'genotypes shape: {genotypes.shape}')
     print(f'initial_guess shape: {initial_guess.shape}')
 
+    print(genotypes[0])
+    print(genotypes[-1])
+    #print(initial_guess)
+    #print(costs[-1][0])
+
     x = get_best_phenotype('results/TruncatedRealMutatorGA/')
-    # print(x)
+    
+    #exit()
+    #print(x)
+    #print(objective_function(x))
+    #exit()
 
     generator = get_best_phenotype_generator('results/TruncatedRealMutatorGA/')
 

@@ -21,6 +21,7 @@ class BaseGA:
     sigma: 0.05
     global_seed: 42
     output_folder: 'results/DeepGA/TruncatedRealMutatorGA'
+    save_steps: 1
     verbose: 0
 
     Description:
@@ -57,7 +58,10 @@ class BaseGA:
         self.workers_per_rank = config.get('workers_per_rank')
         self.num_elite = config.get('num_elite')
         self.num_parents = config.get('num_parents')
-        self.sigma = config.get('sigma')
+        self.sigma_initial = config.get('sigma_initial')
+        self.sigma_min = config.get('sigma_min')
+        self.sigma_decay = config.get('sigma_decay')
+
         self.global_seed = config.get('global_seed')
 
         self.output_folder = config.get('output_folder')
@@ -66,13 +70,15 @@ class BaseGA:
 
         self.initial_guess = config.get('initial_guess')
 
+        # Internal:
+        self.sigma = self.sigma_initial
+        self.generation = 0
+        self.population_size = self._size * self.workers_per_rank
+
         # Initialize Mutator and Selection
         self.mutator_initialize()
         self.selection_initialize()
 
-        # Internal:
-        self.generation = 0
-        self.population_size = self._size * self.workers_per_rank
 
         # Logger and DataCollector for MPI:
 
@@ -87,12 +93,12 @@ class BaseGA:
             self.saver_initialguess = MPISaver(f'{self.output_folder}/initial_guess.npy')
 
     #@abstractmethod
-    def apply_selection(self, ranks_by_performance):
-        pass
+    #def apply_selection(self, ranks_by_performance):
+    #    pass
 
     #@abstractmethod
-    def apply_mutation(self, ranks_by_performance):
-        pass
+    #def apply_mutation(self, ranks_by_performance):
+    #    pass
 
     def run(self, objective_function, steps):
 
@@ -116,8 +122,7 @@ class BaseGA:
         # CLOSING:
         if self._rank == 0:
             if self.output_folder != None:
-                info = {'nb_generations': steps,
-                        'sigma': self.sigma}
+                info = {'nb_generations': steps}
                 with open(f'{self.output_folder}/info.json', "w") as f:
                     json.dump(info, f)
 
@@ -174,6 +179,7 @@ class BaseGA:
         # ===================== END LOGGING ===================================
 
         # Apply mutations:
+        self.update_sigma()
         self.apply_mutation(ranks_and_members_by_performance)
 
         # ======================= LOGGING =====================================
@@ -200,3 +206,8 @@ class BaseGA:
     @ property
     def costs(self):
         return self.cost_list
+
+    def update_sigma(self):
+        self.sigma *= self.sigma_decay
+        if self.sigma < self.sigma_min:
+            self.sigma = self.sigma_min

@@ -53,16 +53,17 @@ This will create a result folder based on output_folder
 
 ##### DeepGA
 
-![DeepGA: population over generations](https://github.com/optimization-toolbox/DNE4py/blob/master/DNE4py/tutorials/pp_results/gif/deepga_truncatedrealmutatorga.gif)
+![DeepGA: population over generations](https://github.com/optimization-toolbox/DNE4py/blob/master/tutorials/2_postprocessing_the_results/gif/deepga_truncatedrealmutatorga.gif)
+
 
 
 ##### CMA-ES
 
-![CMA-ES: population over generations](https://github.com/optimization-toolbox/DNE4py/blob/master/DNE4py/tutorials/gif/cmaes.gif)
+![CMA-ES: population over generations](https://github.com/optimization-toolbox/DNE4py/blob/master/tutorials/2_postprocessing_the_results/gif/cmaes.gif)
 
 ##### RandomSearch
 
-![RandomSearch: population over generations](https://github.com/optimization-toolbox/DNE4py/blob/master/DNE4py/tutorials/gif/randomsearch.gif)
+![RandomSearch: population over generations](https://github.com/optimization-toolbox/DNE4py/blob/master/tutorials/2_postprocessing_the_results/gif/randomsearch.gif)
 
 ## Post-processing
 

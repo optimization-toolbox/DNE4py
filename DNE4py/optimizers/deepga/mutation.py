@@ -25,11 +25,10 @@ class RealMutator(BaseGA):
         self.initial_genotypes = []
         for i in range(self.workers_per_rank):
             initial_genotype = self.rng_genes_list[i].randint(2**32 - 1)
-            self.initial_genotypes.append([initial_genotype])
+            self.initial_genotypes.append([[initial_genotype, self.sigma]])
 
         self.members = [Member(initial_phenotype=self.initial_guess,
-                               initial_genotype=self.initial_genotypes[i],
-                               sigma=self.sigma)
+                               genotype=self.initial_genotypes[i])
                         for i in range(self.workers_per_rank)]
 
     def apply_mutation(self, ranks_and_members_by_performance):
@@ -55,4 +54,4 @@ class RealMutator(BaseGA):
         for rank, member_id in no_elite_tuples:
             if rank == self._rank:
                 rng_genes = self.rng_genes_list[member_id]
-                self.members[member_id].mutate(rng_genes)
+                self.members[member_id].mutate(rng_genes, self.sigma)

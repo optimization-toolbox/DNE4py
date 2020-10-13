@@ -20,4 +20,4 @@ if "__main__" == __name__:
     optimizer = load_optimizer(optimizer_config)
 
     # Run Optimizer:
-    optimizer.run(objective_function, 5)
+    optimizer.run(objective_function, 2)

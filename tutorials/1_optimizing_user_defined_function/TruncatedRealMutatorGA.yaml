@@ -1,22 +1,12 @@
 optimizer:
   id: TruncatedRealMutatorGA
-  workers_per_rank: 32
-  num_elite: 3
-  num_parents: 5
-  sigma: 0.05
+  workers_per_rank: 64
+  num_elite: 1
+  num_parents: 1
+  sigma_initial: 0.1
+  sigma_min: 0.01
+  sigma_decay: 0.95
   global_seed: 42
-  output_folder: 'results/TruncatedRealMutatorGA'
+  output_folder: '../2_postprocessing_the_results/results/TruncatedRealMutatorGA'
   save_steps: 1
   verbose: 2
-
-
-# optimizer:
-#   global_seed: 612602
-#   id: TruncatedRealMutatorGA
-#   num_elite: 4
-#   num_parents: 19
-#   output_folder: data/FINAL
-#   save: 1
-#   sigma: 0.053707166185687674
-#   verbose: 1
-#   workers_per_rank: 16

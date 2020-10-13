@@ -27,10 +27,10 @@ class MPILogger:
     def __init__(self, file_path):
 
         self.file_path = file_path
-        folder_path, filename = os.path.split(file_path)
+        self.folder_path, self.filename = os.path.split(file_path)
 
         try:
-            os.makedirs(folder_path)
+            os.makedirs(self.folder_path)
         except:
             pass
 
